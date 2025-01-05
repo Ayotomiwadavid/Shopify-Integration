@@ -6,10 +6,12 @@ const baseUrl = 'https://openapi.etsy.com/v3/application/'
 const shop_id = 'displaychamp'
 
 const getShopReceipt = async (req, res, next) => {
+    console.log('get shop receipt');
     const options = {
         method: 'GET',
         url: `${baseUrl}shops/${shop_id}/receipts`,
         headers: {
+            'Authorization': `Bearer ${process.env.auth_token}`,
             'x-api-key': apiKey,
         },
     };
@@ -46,5 +48,6 @@ const getListingData = async (req, res, next) => {
         console.log(error);
     }
 }
+
 
 module.exports = { getShopReceipt, getListingData };
