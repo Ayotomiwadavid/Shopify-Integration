@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const crypto = require('crypto'); // For generating code_verifier and code_challenge
-const { router } = require('./Router');
-const { getShopReceipt, getListingData } = require('./Controller/Index');
+const crypto = require('crypto');
+const axios = require('axios'); // Import axios
+const router = require('./Router/index');
 require('dotenv').config();
 
 const app = express();
@@ -35,7 +35,7 @@ const getAuthorizationUrl = () => {
     return `https://www.etsy.com/oauth/connect?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=customState123&code_challenge=${codeChallenge}&code_challenge_method=S256`;
 };
 
-app.use('/', getShopReceipt);
+app.use('/', router);
 
 // Redirect route for authorization
 app.get('/authorize', (req, res) => {
@@ -59,36 +59,75 @@ app.get('/callback', async (req, res) => {
     const tokenEndpoint = 'https://api.etsy.com/v3/public/oauth/token';
 
     try {
-        const response = await fetch(tokenEndpoint, {
-            method: 'POST',
+        const response = await axios.post(tokenEndpoint, new URLSearchParams({
+            grant_type: 'authorization_code',
+            client_id: clientId,
+            client_secret: clientSecret,
+            code: authorizationCode,
+            redirect_uri: redirectUri,
+            code_verifier: codeVerifier, // Include code_verifier here
+        }).toString(), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams({
-                grant_type: 'authorization_code',
-                client_id: clientId,
-                client_secret: clientSecret,
-                code: authorizationCode,
-                redirect_uri: redirectUri,
-                code_verifier: codeVerifier, // Include code_verifier here
-            }),
         });
 
-        const data = await response.json();
+        const data = response.data;
 
-        if (response.ok) {
-            console.log('Access Token Response:', data);
-            res.status(200).send('Authorization successful');
-        } else {
-            console.error('Error exchanging code for token:', data);
-            res.status(500).send('Error exchanging code for token');
-        }
+        console.log('Access Token Response:', data);
+        res.status(200).send('Authorization successful');
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send('Internal server error');
+        console.error('Error exchanging code for token:', error.response?.data || error.message);
+        res.status(500).send('Error exchanging code for token');
     }
 });
 
+// Refresh Token Function
+const refreshToken = async (refreshToken) => {
+    const clientId = process.env.api_key;
+    const clientSecret = process.env.api_secret;
+
+    const tokenEndpoint = 'https://api.etsy.com/v3/public/oauth/token';
+
+    try {
+        const response = await axios.post(tokenEndpoint, new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+        }).toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'x-api-key': process.env.api_key,
+                Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+            },
+        });
+
+        const data = response.data;
+
+        console.log('New Access Token Response:', data);
+        return data; // Return the new access token and refresh token
+    } catch (error) {
+        console.error('Error refreshing token:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.error_description || 'Error refreshing token');
+    }
+};
+
+// Example Route to Refresh Token
+app.post('/refresh-token', async (req, res) => {
+    const { refresh_token } = req.body;
+
+    console.log('refresh_token')
+
+    if (!refresh_token) {
+        return res.status(400).send('Refresh token is missing');
+    }
+
+    try {
+        const tokenData = await refreshToken(refresh_token);
+        res.status(200).json(tokenData);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
 
 app.listen(PORT, () => {
     console.log('Etsy integration server listening on port:' + PORT);
