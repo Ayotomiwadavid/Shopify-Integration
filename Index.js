@@ -5,6 +5,8 @@ const axios = require('axios'); // Import axios
 const router = require('./Router/index');
 require('dotenv').config();
 
+const refreshTokenId = process.env.refresh_token
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -112,8 +114,8 @@ const refreshToken = async (refreshToken) => {
 };
 
 // Example Route to Refresh Token
-app.post('/refresh-token', async (req, res) => {
-    const { refresh_token } = req.body;
+app.get('/refresh-token', async (req, res) => {
+    const  refresh_token  = refreshTokenId
 
     console.log('refresh_token')
 
