@@ -1,16 +1,16 @@
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 require('dotenv').config();
 
-const createReportDoc = async (data, headers) => {
+const createReportDoc = async (csvPath, data, headers) => {
     const csvWriter = createCsvWriter({
-        path: process.env.csv_path,
+        path: csvPath,
         header: headers,
     });
 
     try {
         await csvWriter.writeRecords(data);
-        console.log(`Data successfully written to ${process.env.csv_path}`);
-        return(`Data successfully written to ${process.env.csv_path}`);
+        console.log(`Data successfully written to ${csvPath}`);
+        return(`Data successfully written to ${csvPath}`);
     } catch (error) {
         console.error('Error writing data to CSV:', error.message);
         return('Error writing data to CSV:', error.message);

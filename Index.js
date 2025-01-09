@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const axios = require('axios'); // Import axios
 const router = require('./Router/index');
+const path = require('path')
 require('dotenv').config();
 
 const refreshTokenId = process.env.refresh_token
@@ -38,6 +39,14 @@ const getAuthorizationUrl = () => {
 };
 
 app.use('/', router);
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route to serve the HTML page
+app.get('/', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'index.html');
+    res.sendFile(filePath);
+});
 
 // Redirect route for authorization
 app.get('/authorize', (req, res) => {

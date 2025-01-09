@@ -39,6 +39,7 @@ const getShop = async (req, res, next) => {
 
 const getShopReceipt = async (req, res, next) => {
     console.log('get shop receipt');
+    let filePath = './etsy_receipt.csv'
     const shopOrders = [];
     const options = {
         method: 'GET',
@@ -113,12 +114,11 @@ const getShopReceipt = async (req, res, next) => {
             {id: 'discount_amt', title: 'Discount Amount'},
         ];
 
-        const result = await createReportDoc(shopOrders, shopOrdersCSVHeader);
+        const result = await createReportDoc(filePath, shopOrders, shopOrdersCSVHeader);
 
         console.log(result);
 
-
-        res.status(200).json(shopOrders);
+        res.status(200).json({msg: result, filePath});
     } catch (error) {
         console.log(error);
     }
@@ -126,6 +126,7 @@ const getShopReceipt = async (req, res, next) => {
 
 const getListingData = async (req, res, next) => {
     const shopProducts = [];
+     let filePath = './etsy_receipt.csv'
     const options = {
         method: 'GET',
         url: `${baseUrl}/listings/active`,
@@ -169,12 +170,12 @@ const getListingData = async (req, res, next) => {
             { id: 'quantity', title: 'Inventory Level' },
         ];
 
-        const result = await createReportDoc(shopProducts, inventoryCSVHeader);
+        const result = await createReportDoc(filePath, shopProducts, inventoryCSVHeader);
 
         console.log(result);
 
 
-        res.status(200).json(result);
+        res.status(200).json({msg: result, filePath});
 
     } catch (error) {
         console.log(error);
@@ -182,6 +183,10 @@ const getListingData = async (req, res, next) => {
 }
 
 const getShopTransaction = async (req, res, next) => {
+
+    let filePath = './etsy_transactions.csv'
+    let transactiionArray = []
+
     const options = {
         method: 'GET',
         url: `${baseUrl}shops/${shop_id}/transactions`,
@@ -199,9 +204,71 @@ const getShopTransaction = async (req, res, next) => {
         }
 
         const data = response.data.results;
-        console.log('Shop Transactions:', data);
 
-        res.status(200).json(data);
+        // Initialize financial data
+        let grossRevenue = 0;
+        let netRevenue = 0;
+        let transactionFees = 0;
+        let shippingFees = 0;
+        let refunds = 0;
+        let commissionFees = 0;
+
+        // Etsy fee percentage (adjust based on Etsy's fee structure)
+        const ETSY_COMMISSION_RATE = 0.05; // Example: 5%
+
+        data.forEach(transaction => {
+            const grossAmount = transaction.price.amount / transaction.price.divisor;
+            const shippingAmount = transaction.shipping_cost.amount / transaction.shipping_cost.divisor;
+
+            grossRevenue += grossAmount;
+            shippingFees += shippingAmount;
+
+            // Calculate Etsy commission
+            const commission = grossAmount * ETSY_COMMISSION_RATE;
+            commissionFees += commission;
+
+            // Simulate transaction fees (replace with real calculation)
+            const transactionFee = grossAmount * 0.03; // Example: 3%
+            transactionFees += transactionFee;
+
+            // Add refund handling (if applicable)
+            if (transaction.transaction_type === 'refund') {
+                refunds += grossAmount;
+            }
+        });
+
+        // Calculate net revenue
+        netRevenue = grossRevenue - (transactionFees + commissionFees + refunds);
+
+        // Prepare final output
+        const financialSummary = {
+            grossRevenue,
+            netRevenue,
+            transactionFees,
+            commissionFees,
+            shippingFees,
+            refunds,
+        };
+
+        transactiionArray.push(financialSummary);
+
+        console.log('Financial Summary:', transactiionArray);
+
+        const transactionCsvHeader = [
+            { id: 'grossRevenue', title: 'Gross Revenue' },
+            { id: 'netRevenue', title: 'Net Revenue' },
+            { id: 'transactionFees', title: 'Transaction Fees' },
+            { id: 'commissionFees', title: 'Commission Fees' },
+            { id: 'shippingFees', title: 'Shipping Fees' },
+            { id: 'refunds', title: 'Refunds' },
+        ]
+
+        const result = await createReportDoc(filePath, transactiionArray, transactionCsvHeader);
+
+        console.log(result);
+
+        res.status(200).json({msg: result, filePath});
+
     } catch (error) {
         console.error('Error fetching shop transactions:', error.message);
         res.status(500).json({ error: error.message });
