@@ -20,7 +20,7 @@ const getShopOderDetails = async () => {
 
         console.log(result);
 
-       let fileUrl = `${baseUrl}${result.filePath}`
+       let fileUrl = './etsy_receipt.csv';
 
         console.log(fileUrl);
 
@@ -55,7 +55,7 @@ const getShopInventory = async () => {
 
         console.log(result);
 
-        let fileUrl = `${baseUrl}${result.filePath}`
+        let fileUrl = './etsy_receipt.csv'
 
         console.log(fileUrl);
 
@@ -90,7 +90,7 @@ const getTransactionDetails = async () => {
 
         console.log(result);
 
-        let fileUrl = `${baseUrl}${result.filePath}`
+        let fileUrl = './etsy_transactions.csv'
 
         console.log(fileUrl);
 

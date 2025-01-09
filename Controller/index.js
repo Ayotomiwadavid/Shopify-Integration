@@ -2,10 +2,42 @@ const axios = require('axios');
 const createReportDoc = require('./reportDoc');
 require('dotenv').config();
 
+let access_token = '981916249.yrgp_Yr3Ts9Oz4241R5kAARhGeqdRgJBVfCbAqsCGLRN_JARxiEWq-oo3VGTfGpcXJ1xa7OYQFxneWVv-zpRf4gEae';
+let refresh_token = '981916249.sLRLXrGIhcmitBpjYwNLXZeEFA_m8Eqz8LuMiH53mSAlgNd4RpAqBHhCW-gE9xvF2YTQUJpjGShsrgqyM_oZtqivmF'
+
 const apiKey = process.env.api_key
 const baseUrl = 'https://openapi.etsy.com/v3/application/'
 const shop_name = 'displaychamp'
 const shop_id = 54850131
+
+const refreshToken = async (req, res, next) => {
+    const url = 'https://api.etsy.com/v3/public/oauth/token';
+
+    const data = {
+        grant_type: 'refresh_token',
+        client_id: process.env.api_key,
+        refresh_token: refresh_token,
+    };
+
+    try {
+        const response = await axios.post(url, data, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        // The new access token is in the response
+        console.log('New Access Token:', response.data.access_token);
+        console.log('New Refresh Token:', response.data.refresh_token);
+
+        access_token = response.data.access_token;
+        refresh_token = response.data.refresh_token;
+
+        return response.data;
+    } catch (error) {
+        console.error('Error refreshing Etsy token:', error.response?.data || error.message);
+    }
+}
 
 const getShop = async (req, res, next) => {
 
@@ -39,13 +71,13 @@ const getShop = async (req, res, next) => {
 
 const getShopReceipt = async (req, res, next) => {
     console.log('get shop receipt');
-    let filePath = './etsy_receipt.csv'
+    let filePath = './Public/etsy_receipt.csv'
     const shopOrders = [];
     const options = {
         method: 'GET',
         url: `${baseUrl}shops/${shop_id}/receipts`,
         headers: {
-            'Authorization': `Bearer ${process.env.auth_token}`,
+            'Authorization': `Bearer ${access_token}`,
             'x-api-key': apiKey,
         },
     };
@@ -126,12 +158,12 @@ const getShopReceipt = async (req, res, next) => {
 
 const getListingData = async (req, res, next) => {
     const shopProducts = [];
-     let filePath = './etsy_receipt.csv'
+     let filePath = './Public/etsy_receipt.csv'
     const options = {
         method: 'GET',
         url: `${baseUrl}/listings/active`,
         headers: {
-            'Authorization': `Bearer ${process.env.auth_token}`,
+            'Authorization': `Bearer ${access_token}`,
             'x-api-key': apiKey,
         },
     };
@@ -184,14 +216,14 @@ const getListingData = async (req, res, next) => {
 
 const getShopTransaction = async (req, res, next) => {
 
-    let filePath = './etsy_transactions.csv'
+    let filePath = './Public/etsy_transactions.csv'
     let transactiionArray = []
 
     const options = {
         method: 'GET',
         url: `${baseUrl}shops/${shop_id}/transactions`,
         headers: {
-            'Authorization': `Bearer ${process.env.auth_token}`,
+            'Authorization': `Bearer ${access_token}`,
             'x-api-key': apiKey,
         },
     };
@@ -275,5 +307,11 @@ const getShopTransaction = async (req, res, next) => {
     }
 };
 
+// Automatically refresh the token every 30 minutes
+setInterval(() => {
+    console.log('Refreshing token...');
+    refreshToken();
+}, 30 * 60 * 1000); // 30 minutes in milliseconds
 
+ 
 module.exports = { getShopReceipt, getListingData, getShop, getShopTransaction };
