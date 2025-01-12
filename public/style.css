@@ -1,0 +1,78 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: #f5f5ff;
+}
+
+.header{
+    width: 100%;
+    height: 100px;
+    border-bottom: 1px solid gray;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 10px 5vw;
+}
+
+.logoCont{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.logo{
+    width: 70px;
+    height: 70px;
+}
+
+.mainSec{
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    padding: 15px 5vw;
+}
+
+.info{
+    width: 100%;
+    font-size: 20px;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
+    text-transform: capitalize;
+}
+
+.buttonCont{
+    width: 100%;
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80%;
+}
+
+.InitializationBtn{
+    width: fit-content;
+    padding: 10px;
+    border-radius: 15px;
+    height: 55px;
+    margin: 0 15px;
+    outline: none;
+    border: none;
+    background-color: #E59F1E;
+    color: #fff;
+    text-transform: capitalize;
+    font-size: 25px;
+    cursor: pointer;
+    transition: all .3s ease-in-out;
+}
+
+.InitializationBtn:hover{
+    box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.5);
+}
