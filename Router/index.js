@@ -1,5 +1,5 @@
 const express = require('express');
-const { getShopReceipt, getShop, getListingData, getShopTransaction } = require('../Controller/Index');
+const { getShopReceipt, getShop, getListingData, getShopTransaction } = require('../Controller/index');
 const router = express.Router();
 
 router.get('/get-shopReceipt', getShopReceipt);
