@@ -1,4 +1,4 @@
-const baseUrl = 'http://localhost:8000/'
+const baseUrl = 'https://shopify-integration-sefh.onrender.com/'
 
 const getShopOderDetails = async () => {
 
