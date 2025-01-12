@@ -8,4 +8,4 @@ router.get('/getShop_listing', getListingData);
 router.get('/getShop-transactions', getShopTransaction);
 
 
-module.exports = router;
+module.exports = router
