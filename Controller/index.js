@@ -2,7 +2,7 @@ const axios = require('axios');
 const createReportDoc = require('./reportDoc');
 require('dotenv').config();
 
-let access_token = '981916249.yrgp_Yr3Ts9Oz4241R5kAARhGeqdRgJBVfCbAqsCGLRN_JARxiEWq-oo3VGTfGpcXJ1xa7OYQFxneWVv-zpRf4gEae';
+let access_token = '981916249.yrgp_Yr3Ts9Oz4241R5kAARhGeqdRgJBVfCbAqsCGLRN_JARxiEWq-oo3VGTfGpcXJ1xa7OYQFxneWVv-zpRf4gEae'
 let refresh_token = '981916249.sLRLXrGIhcmitBpjYwNLXZeEFA_m8Eqz8LuMiH53mSAlgNd4RpAqBHhCW-gE9xvF2YTQUJpjGShsrgqyM_oZtqivmF'
 
 const apiKey = process.env.api_key
@@ -311,7 +311,7 @@ const getShopTransaction = async (req, res, next) => {
 setInterval(() => {
     console.log('Refreshing token...');
     refreshToken();
-}, 30 * 60 * 1000); // 30 minutes in milliseconds
+}, 10 * 60 * 1000); 
 
  
 module.exports = { getShopReceipt, getListingData, getShop, getShopTransaction };
